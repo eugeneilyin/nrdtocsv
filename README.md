@@ -13,7 +13,7 @@
 ## Quick Start
 
 1. Download the latest AddOn **Source Code (zip)** file from the repository [releases][releases]
-2. Import AddOn into NinjaTrader 8 via `Tools` / `Import` / `NinjaScript AddOn...`
+2. Import AddOn into NinjaTrader 8 via `Tools` / `Import` / `NinjaScript Add-On...`
 3. Open NRD to CSV tool via `Tools` / `NRD to CSV`
 5. Press **Convert** button to convert all `*.nrd` replay files (could take some time to proceed)
 6. Check `Documents` \ `NinjaTrader 8` \ `db` \ `replay.csv` folder with the results
