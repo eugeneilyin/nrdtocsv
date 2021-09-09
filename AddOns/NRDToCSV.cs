@@ -181,6 +181,11 @@ namespace NinjaTrader.Gui.NinjaScript
                 run();
                 foreach (string subDir in nrdSubDirs)
                     ProcessDirectory(nrdDir, subDir, csvDir, selectedInstruments);
+                if (filesCount == 0)
+                {
+                    logout("No *.nrd files found or filtered to convert");
+                    complete();
+                }
             }));
         }
 
@@ -302,7 +307,7 @@ namespace NinjaTrader.Gui.NinjaScript
         {
             Dispatcher.InvokeAsync(() =>
             {
-                if (--filesCount == 0)
+                if (--filesCount <= 0)
                 {
                     logout("Conversion complete");
                     tbCsvRootDir.IsReadOnly = false;
