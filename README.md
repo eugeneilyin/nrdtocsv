@@ -1,11 +1,12 @@
 <div align="center">
 
-![image](https://user-images.githubusercontent.com/14204888/132671281-c7f68d43-cbfa-47da-87db-3092c60ec55c.png)
-
 <h1>NRDToCSV</h1>
+  
+![image](https://user-images.githubusercontent.com/14204888/132671281-c7f68d43-cbfa-47da-87db-3092c60ec55c.png)
 
 </div>
 
+#
 **NinjaTrader 8** AddOn to convert NRD (`*.nrd`) market replay files to CSV (`*.csv`)<br>
 (based on [not yet documented][market-data] `MarketReplay.DumpMarketDepth` feature)
 
