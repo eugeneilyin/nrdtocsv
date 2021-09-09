@@ -97,6 +97,6 @@ The code is available under the [MIT license][license].
 Feel free to contact me at **@gmail.com**: **eugene.ilyin**
 
 [market-data]: https://ninjatrader.com/support/forum/forum/ninjatrader-8/platform-technical-support-aa/1067384-more-info-on-marketreplay-dumpmarketdata-marketreplay-dumpmarketdepth
-[releases]: https://github.com/eugeneilyin/nrdtocsv/releases
+[releases]: https://github.com/eugeneilyin/nrdtocsv/tree/main/Releases
 [license]: /License.txt
 [semver]: http://semver.org
