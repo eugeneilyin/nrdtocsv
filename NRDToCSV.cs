@@ -100,7 +100,7 @@ namespace NinjaTrader.Gui.NinjaScript
             {
                 Foreground = FindResource("FontLabelBrush") as Brush,
                 Margin = new Thickness(margin, 0, margin, 0),
-                Content = "Root directory of converted _CSV files:",
+                Content = "Root directory of converted CSV files:",
             };
             tbSelectedInstruments = new TextBox() { Margin = new Thickness(margin, 0, margin, margin) };
             Label lSelectedInstruments = new Label()
