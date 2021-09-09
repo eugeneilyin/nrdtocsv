@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -95,20 +94,20 @@ namespace NinjaTrader.Gui.NinjaScript
             tbCsvRootDir = new TextBox()
             {
                 Margin = new Thickness(margin, 0, margin, margin),
-                Text = Path.Combine(NinjaTrader.Core.Globals.UserDataDir, "db", "replay.csv"),
+                Text = Path.Combine(Globals.UserDataDir, "db", "replay.csv"),
             };
             Label lCsvRootDir = new Label()
             {
                 Foreground = FindResource("FontLabelBrush") as Brush,
                 Margin = new Thickness(margin, 0, margin, 0),
-                Content = "Converted _CSV root directory:",
+                Content = "Root directory of converted _CSV files:",
             };
             tbSelectedInstruments = new TextBox() { Margin = new Thickness(margin, 0, margin, margin) };
             Label lSelectedInstruments = new Label()
             {
                 Foreground = FindResource("FontLabelBrush") as Brush,
                 Margin = new Thickness(margin, margin, margin, 0),
-                Content = "Semicolon separated regexes to filer *.nrd file names (keep empty to proceed all):",
+                Content = "Semicolon separated RegEx'es to filter *.nrd file names (keep empty to proceed all):",
             };
             bConvert = new Button() { Margin = new Thickness(margin), IsDefault = true, Content = "_Convert" };
             bConvert.Click += OnConvertButtonClick;
@@ -146,7 +145,7 @@ namespace NinjaTrader.Gui.NinjaScript
             if (tbOutput == null) return;
             tbOutput.Clear();
 
-            string nrdDir = Path.Combine(NinjaTrader.Core.Globals.UserDataDir, "db", "replay");
+            string nrdDir = Path.Combine(Globals.UserDataDir, "db", "replay");
             string csvDir = tbCsvRootDir.Text;
             List<Regex> selectedInstruments = tbSelectedInstruments.Text.IsNullOrEmpty() ? null :
                 tbSelectedInstruments.Text.Split(';').Select(p => new Regex(p.Trim())).ToList();
@@ -177,11 +176,12 @@ namespace NinjaTrader.Gui.NinjaScript
                 return;
             }
 
-			Globals.RandomDispatcher.InvokeAsync(new Action(() =>  {
-				run();
-    	        foreach (string subDir in nrdSubDirs)
-            	    ProcessDirectory(nrdDir, subDir, csvDir, selectedInstruments);
-			}));
+            Globals.RandomDispatcher.InvokeAsync(new Action(() =>
+            {
+                run();
+                foreach (string subDir in nrdSubDirs)
+                    ProcessDirectory(nrdDir, subDir, csvDir, selectedInstruments);
+            }));
         }
 
         private void ProcessDirectory(string nrdRoot, string nrdDir, string csvDir, List<Regex> selectedInstruments)
@@ -201,10 +201,10 @@ namespace NinjaTrader.Gui.NinjaScript
                 if (selectedInstruments != null && selectedInstruments.Where(r => r.Match(relativeName).Success).Count() == 0)
                     continue;
 
-                Collection<Instrument> instruments = NinjaTrader.Cbi.InstrumentList.GetInstruments(fullName);
+                Collection<Instrument> instruments = InstrumentList.GetInstruments(fullName);
                 if (instruments.Count == 0)
                 {
-                    logout(string.Format("Unable to find an instrument name \"{0}\". Skipped", fullName));
+                    logout(string.Format("Unable to find an instrument named \"{0}\". Skipped", fullName));
                     continue;
                 }
                 else if (instruments.Count > 1)
@@ -237,12 +237,12 @@ namespace NinjaTrader.Gui.NinjaScript
                 }
 
                 filesCount++;
-				Globals.RandomDispatcher.InvokeAsync(new Action(() => 
+                Globals.RandomDispatcher.InvokeAsync(new Action(() =>
                 {
                     logout(string.Format("Convert \"{0}\" to \"{1}\"...", relativeName, csvFileName.Substring(csvDir.Length)));
                     MarketReplay.DumpMarketDepth(instrument, date.AddDays(1), date.AddDays(1), csvFileName);
                     logout(string.Format("Convert \"{0}\" to \"{1}\" complete", relativeName, csvFileName.Substring(csvDir.Length)));
-					complete();
+                    complete();
                 }));
             }
         }
@@ -276,34 +276,40 @@ namespace NinjaTrader.Gui.NinjaScript
         }
 
         public WorkspaceOptions WorkspaceOptions { get; set; }
-		
+
         private void logout(string text)
         {
-            Dispatcher.InvokeAsync(() => {
-				tbOutput.AppendText(text + Environment.NewLine);
-				tbOutput.ScrollToEnd();
-			});
+            Dispatcher.InvokeAsync(() =>
+            {
+                tbOutput.AppendText(text + Environment.NewLine);
+                tbOutput.ScrollToEnd();
+            });
         }
-		
-		private void run() {
-			Dispatcher.InvokeAsync(() => {
-				logout("Convers files...");
-    	       	filesCount = 0;
-				tbCsvRootDir.IsReadOnly = true;
-				tbSelectedInstruments.IsReadOnly = true;
-				bConvert.IsEnabled = false;
-			});
-		}
 
-		private void complete() {
-			Dispatcher.InvokeAsync(() => {
-				if (--filesCount == 0) {
-					logout("Conversion complete");
-					tbCsvRootDir.IsEnabled = true;
-					tbSelectedInstruments.IsEnabled = true;
-					bConvert.IsEnabled = true;
-				}
-			});
-		}
+        private void run()
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                tbCsvRootDir.IsReadOnly = true;
+                tbSelectedInstruments.IsReadOnly = true;
+                bConvert.IsEnabled = false;
+                logout("Convert files...");
+                filesCount = 0;
+            });
+        }
+
+        private void complete()
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (--filesCount == 0)
+                {
+                    logout("Conversion complete");
+                    tbCsvRootDir.IsReadOnly = false;
+                    tbSelectedInstruments.IsReadOnly = false;
+                    bConvert.IsEnabled = true;
+                }
+            });
+        }
     }
 }
