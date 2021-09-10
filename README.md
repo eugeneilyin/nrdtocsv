@@ -22,7 +22,7 @@
 
 You can specify filenames to convert with semicolon-separated regular expressions:
 
-- Convert only gold commodity futures: `GC`
+- Convert only Gold Commodity futures: `GC`
 - Convert several instruments: `GC; HG; 6E`
 - Convert files with names related only to December 2021: `202112\d{2}`<br>
   Means: `"2021"` `"12"` `<any 2 digits of Day>`
