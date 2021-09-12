@@ -17,11 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Limit parallel conversion to 8 threads
   (enough for most CPU and Hard Drives loads during conversion)
 
-## [1.0.0] - 2021-09-09
+## 1.0.0 - 2021-09-09
 ### Added
 - Ability to specify output `*.csv` root directory
 - Filter of `*.nrd` file names to convert based on RedExp
 
 [Unreleased]: https://github.com/eugeneilyin/nrdtocsv/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/eugeneilyin/nrdtocsv/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/eugeneilyin/nrdtocsv/releases/tag/v1.0.0
