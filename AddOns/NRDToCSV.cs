@@ -218,7 +218,7 @@ namespace NinjaTrader.Gui.NinjaScript
                 {
                     Globals.RandomDispatcher.InvokeAsync(new Action(() =>
                     {
-                        logout(string.Format("Convert {0} files...", entries.Count));
+                        logout(string.Format("Convert {0} file(s)...", entries.Count));
                         run(entries.Count);
                         taskCount = 8;
                         for (int i = 0; i < taskCount; i++)
