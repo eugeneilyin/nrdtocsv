@@ -68,7 +68,10 @@ namespace NinjaTrader.Gui.NinjaScript
         private TextBox tbSelectedInstruments;
         private Button bConvert;
         private TextBox tbOutput;
-        private int filesCount;
+        private ProgressBar pbProgress;
+        private int taskCount;
+        private bool running;
+        private bool canceling;
 
         public NRDToCSVWindow()
         {
@@ -87,6 +90,14 @@ namespace NinjaTrader.Gui.NinjaScript
                     bConvert.Click -= OnConvertButtonClick;
             };
         }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            if (running)
+                canceling = true;
+            base.OnClosed(e);
+        }
+
 
         private DependencyObject BuildContent()
         {
@@ -118,6 +129,8 @@ namespace NinjaTrader.Gui.NinjaScript
                 VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
                 Margin = new Thickness(margin),
             };
+            pbProgress = new ProgressBar() { Margin = new Thickness(0, 0, 0, 0), Height = 0 };
+
             Grid grid = new Grid() { Background = new SolidColorBrush(Colors.Transparent) };
             grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
             grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
@@ -125,24 +138,40 @@ namespace NinjaTrader.Gui.NinjaScript
             grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
             grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(1, GridUnitType.Star) });
+            grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
             Grid.SetRow(lCsvRootDir, 0);
             Grid.SetRow(tbCsvRootDir, 1);
             Grid.SetRow(lSelectedInstruments, 2);
             Grid.SetRow(tbSelectedInstruments, 3);
             Grid.SetRow(bConvert, 4);
             Grid.SetRow(tbOutput, 5);
+            Grid.SetRow(pbProgress, 6);
             grid.Children.Add(lCsvRootDir);
             grid.Children.Add(tbCsvRootDir);
             grid.Children.Add(lSelectedInstruments);
             grid.Children.Add(tbSelectedInstruments);
             grid.Children.Add(bConvert);
             grid.Children.Add(tbOutput);
+            grid.Children.Add(pbProgress);
             return grid;
         }
 
         private void OnConvertButtonClick(object sender, RoutedEventArgs e)
         {
             if (tbOutput == null) return;
+
+            if (running)
+            {
+                if (!canceling)
+                {
+                    canceling = true;
+                    logout("Canceling convertion...");
+                    bConvert.IsEnabled = false;
+                    bConvert.Content = "Canceling...";
+                }
+                return;
+            }
+
             tbOutput.Clear();
 
             string nrdDir = Path.Combine(Globals.UserDataDir, "db", "replay");
@@ -178,18 +207,28 @@ namespace NinjaTrader.Gui.NinjaScript
 
             Globals.RandomDispatcher.InvokeAsync(new Action(() =>
             {
-                run();
+                List<DumpEntry> entries = new List<DumpEntry>();
                 foreach (string subDir in nrdSubDirs)
-                    ProcessDirectory(nrdDir, subDir, csvDir, selectedInstruments);
-                if (filesCount == 0)
+                    ProceedDirectory(entries, nrdDir, subDir, csvDir, selectedInstruments);
+                if (entries.Count == 0)
                 {
-                    logout("No *.nrd files found or filtered to convert");
-                    complete();
+                    logout("No *.nrd files found to convert");
+                }
+                else
+                {
+                    Globals.RandomDispatcher.InvokeAsync(new Action(() =>
+                    {
+                        logout(string.Format("Convert {0} files...", entries.Count));
+                        run(entries.Count);
+                        taskCount = 8;
+                        for (int i = 0; i < taskCount; i++)
+                            RunConversion(entries, i, taskCount);
+                    }));
                 }
             }));
         }
 
-        private void ProcessDirectory(string nrdRoot, string nrdDir, string csvDir, List<Regex> selectedInstruments)
+        private void ProceedDirectory(List<DumpEntry> entries, string nrdRoot, string nrdDir, string csvDir, List<Regex> selectedInstruments)
         {
             string[] fileEntries = Directory.GetFiles(nrdDir, "*.nrd");
             if (fileEntries.Length == 0)
@@ -218,38 +257,68 @@ namespace NinjaTrader.Gui.NinjaScript
                     continue;
                 }
                 Cbi.Instrument instrument = instruments[0];
-
                 string name = Path.GetFileNameWithoutExtension(fileName);
-                DateTime date = new DateTime(
-                    Convert.ToInt16(name.Substring(0, 4)),
-                    Convert.ToInt16(name.Substring(4, 2)),
-                    Convert.ToInt16(name.Substring(6, 2)));
-
                 string csvFileName = string.Format("{0}.csv", Path.Combine(csvDir, instrument.FullName, name));
-
-                string csvFileDir = Path.GetDirectoryName(csvFileName);
-                if (!Directory.Exists(csvFileDir))
+                entries.Add(new DumpEntry()
                 {
-                    try
+                    Instrument = instrument,
+                    Date = new DateTime(
+                        Convert.ToInt16(name.Substring(0, 4)),
+                        Convert.ToInt16(name.Substring(4, 2)),
+                        Convert.ToInt16(name.Substring(6, 2))),
+                    CsvFileName = csvFileName,
+                    FromName = relativeName.Substring(1),
+                    ToName = csvFileName.Substring(csvDir.Length + 1),
+                });
+            }
+        }
+
+        private void RunConversion(List<DumpEntry> entries, int offset, int increment)
+        {
+            Globals.RandomDispatcher.InvokeAsync(new Action(() =>
+            {
+                for (int i = offset; i < entries.Count; i += increment)
+                {
+                    ConvertNrd(entries[i]);
+                    Dispatcher.InvokeAsync(() => pbProgress.Value++);
+                    if (canceling) break;
+                }
+                if (--taskCount == 0)
+                {
+                    complete();
+                    if (canceling)
                     {
-                        Directory.CreateDirectory(csvFileDir);
+                        logout("Conversion canceled");
                     }
-                    catch (Exception error)
+                    else
                     {
-                        logout(string.Format("ERROR: Unable to create the CSV file directory \"{0}\": {1}",
-                            csvFileDir, error.ToString()));
+                        logout("Conversion complete");
                     }
                 }
+            }));
+        }
 
-                filesCount++;
-                Globals.RandomDispatcher.InvokeAsync(new Action(() =>
+        private void ConvertNrd(DumpEntry entry)
+        {
+            logout(string.Format("Conversion \"{0}\" to \"{1}\"...", entry.FromName, entry.ToName));
+
+            string csvFileDir = Path.GetDirectoryName(entry.CsvFileName);
+            if (!Directory.Exists(csvFileDir))
+            {
+                try
                 {
-                    logout(string.Format("Convert \"{0}\" to \"{1}\"...", relativeName, csvFileName.Substring(csvDir.Length)));
-                    MarketReplay.DumpMarketDepth(instrument, date.AddDays(1), date.AddDays(1), csvFileName);
-                    logout(string.Format("Convert \"{0}\" to \"{1}\" complete", relativeName, csvFileName.Substring(csvDir.Length)));
-                    complete();
-                }));
+                    Directory.CreateDirectory(csvFileDir);
+                }
+                catch (Exception error)
+                {
+                    logout(string.Format("ERROR: Unable to create the CSV file directory \"{0}\": {1}",
+                        csvFileDir, error.ToString()));
+                }
             }
+
+            MarketReplay.DumpMarketDepth(entry.Instrument, entry.Date.AddDays(1), entry.Date.AddDays(1), entry.CsvFileName);
+
+            logout(string.Format("Conversion \"{0}\" to \"{1}\" complete", entry.FromName, entry.ToName));
         }
 
         public void Restore(XDocument document, XElement element)
@@ -291,15 +360,21 @@ namespace NinjaTrader.Gui.NinjaScript
             });
         }
 
-        private void run()
+        private void run(int filesCount)
         {
             Dispatcher.InvokeAsync(() =>
             {
+                running = true;
+                canceling = false;
+                bConvert.IsEnabled = true;
+                bConvert.Content = "_Cancel";
                 tbCsvRootDir.IsReadOnly = true;
                 tbSelectedInstruments.IsReadOnly = true;
-                bConvert.IsEnabled = false;
-                logout("Convert files...");
-                filesCount = 0;
+                pbProgress.Margin = new Thickness((double)FindResource("MarginBase"));
+                pbProgress.Height = 16;
+                pbProgress.Minimum = 0;
+                pbProgress.Maximum = filesCount;
+                pbProgress.Value = 0;
             });
         }
 
@@ -307,14 +382,23 @@ namespace NinjaTrader.Gui.NinjaScript
         {
             Dispatcher.InvokeAsync(() =>
             {
-                if (--filesCount <= 0)
-                {
-                    logout("Conversion complete");
-                    tbCsvRootDir.IsReadOnly = false;
-                    tbSelectedInstruments.IsReadOnly = false;
-                    bConvert.IsEnabled = true;
-                }
+                running = false;
+                pbProgress.Margin = new Thickness(0);
+                pbProgress.Height = 0;
+                tbCsvRootDir.IsReadOnly = false;
+                tbSelectedInstruments.IsReadOnly = false;
+                bConvert.IsEnabled = true;
+                bConvert.Content = "_Convert";
             });
         }
+    }
+
+    public class DumpEntry
+    {
+        public Cbi.Instrument Instrument { get; set; }
+        public DateTime Date { get; set; }
+        public string CsvFileName { get; set; }
+        public string FromName { get; set; }
+        public string ToName { get; set; }
     }
 }
