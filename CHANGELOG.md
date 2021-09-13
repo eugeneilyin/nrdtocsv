@@ -13,9 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Complete and total for files and bytes stat
 
 ### Changed
-- Limit parallel conversion to 4 threads
-  Depending on a hard drive load (checked with `resmon` command) 
-  you can adjust it with the `PARALLEL_THREADS_COUNT` constant
+- Limit parallel conversion to 4 threads<br>
+  (depending on a hard drive load (checked with `resmon` command)<br>
+  you can adjust it with the `PARALLEL_THREADS_COUNT` constant)
 
 ### Fixed
 - Fix minor typos
