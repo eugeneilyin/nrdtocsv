@@ -20,7 +20,7 @@
 
 ## Filter files to convert
 
-You can specify filenames to convert with semicolon-separated <a href="https://regex101.com/r/8EqW6n/1" target="_blank">regular expressions</a>:
+You can specify filenames to convert with semicolon-separated [regular expressions][regex]:
 
 - Convert only Gold Commodity futures: `GC`
 - Convert several instruments: `GC; HG; 6E`
@@ -100,4 +100,4 @@ Feel free to contact me at **@gmail.com**: **eugene.ilyin**
 [license]: /License.txt
 [semver]: http://semver.org
 [market-data]: https://ninjatrader.com/support/forum/forum/ninjatrader-8/platform-technical-support-aa/1067384-more-info-on-marketreplay-dumpmarketdata-marketreplay-dumpmarketdepth
-[regex]: https://regex101.com/r/8EqW6n/1
+[regex]: https://regex101.com/r/8EqW6n/1{:target="_blank"}
