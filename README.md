@@ -20,7 +20,7 @@
 
 ## Filter files to convert
 
-You can specify filenames to convert with semicolon-separated regular expressions:
+You can specify filenames to convert with semicolon-separated [regular expressions][regex]:
 
 - Convert only Gold Commodity futures: `GC`
 - Convert several instruments: `GC; HG; 6E`
@@ -96,7 +96,8 @@ The code is available under the [MIT license][license].
 ## Contacts
 Feel free to contact me at **@gmail.com**: **eugene.ilyin**
 
-[market-data]: https://ninjatrader.com/support/forum/forum/ninjatrader-8/platform-technical-support-aa/1067384-more-info-on-marketreplay-dumpmarketdata-marketreplay-dumpmarketdepth
 [releases]: https://github.com/eugeneilyin/nrdtocsv/tree/main/Releases
 [license]: /License.txt
 [semver]: http://semver.org
+[market-data]: https://ninjatrader.com/support/forum/forum/ninjatrader-8/platform-technical-support-aa/1067384-more-info-on-marketreplay-dumpmarketdata-marketreplay-dumpmarketdepth
+[regex]: https://regex101.com/r/8EqW6n/1
