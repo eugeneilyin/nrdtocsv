@@ -412,9 +412,8 @@ namespace NinjaTrader.Gui.NinjaScript
                 tbCsvRootDir.IsReadOnly = true;
                 tbSelectedInstruments.IsReadOnly = true;
                 double margin = (double)FindResource("MarginBase");
-                lProgress.Margin = new Thickness(0, 0, 0, 0);
                 lProgress.Height = 24;
-                pbProgress.Margin = new Thickness((double)FindResource("MarginBase"));
+                pbProgress.Margin = new Thickness(margin, 0, margin, margin);
                 pbProgress.Height = 16;
                 pbProgress.Minimum = 0;
                 pbProgress.Maximum = filesCount;
