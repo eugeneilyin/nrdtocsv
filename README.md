@@ -20,7 +20,7 @@
 
 ## Filter files to convert
 
-You can specify filenames to convert with semicolon-separated [regular expressions][regex]:
+You can specify filenames to convert with semicolon-separated <a href="https://regex101.com/r/8EqW6n/1" target="_blank">regular expressions</a>:
 
 - Convert only Gold Commodity futures: `GC`
 - Convert several instruments: `GC; HG; 6E`
