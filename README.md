@@ -100,4 +100,4 @@ Feel free to contact me at **@gmail.com**: **eugene.ilyin**
 [license]: /License.txt
 [semver]: http://semver.org
 [market-data]: https://ninjatrader.com/support/forum/forum/ninjatrader-8/platform-technical-support-aa/1067384-more-info-on-marketreplay-dumpmarketdata-marketreplay-dumpmarketdepth
-[regex]: https://regex101.com/r/8EqW6n/1
+[regex]: https://regex101.com/r/8EqW6n/2
