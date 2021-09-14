@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Skip already converted files
 - Estimated time to complete (ETA)
-- Complete and total for files and bytes stat
+- Summary for complete files and bytes to proceed
 
 ### Changed
 - Limit parallel conversion to 4 threads<br>
