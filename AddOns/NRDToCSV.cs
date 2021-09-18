@@ -357,9 +357,16 @@ namespace NinjaTrader.Gui.NinjaScript
                 }
             }
 
-            MarketReplay.DumpMarketDepth(entry.Instrument, entry.Date.AddDays(1), entry.Date.AddDays(1), entry.CsvFileName);
-
-            logout(string.Format("Conversion \"{0}\" to \"{1}\" complete", entry.FromName, entry.ToName));
+            try
+            {
+                MarketReplay.DumpMarketDepth(entry.Instrument, entry.Date.AddDays(1), entry.Date.AddDays(1), entry.CsvFileName);
+                logout(string.Format("Conversion \"{0}\" to \"{1}\" complete", entry.FromName, entry.ToName));
+            }
+            catch (Exception error)
+            {
+                logout(string.Format("ERROR: Conversion \"{0}\" to \"{1}\" failed: {2}", 
+                    entry.FromName, entry.ToName, error.ToString()));
+            }
         }
 
         public void Restore(XDocument document, XElement element)
