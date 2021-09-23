@@ -76,8 +76,8 @@ namespace NinjaTrader.Gui.NinjaScript
         private DateTime startTimestamp;
         private long completeFilesLength;
         private long totalFilesLength;
-        private bool running;
-        private bool canceling;
+        private bool running = false;
+        private bool canceling = false;
 
         public NRDToCSVWindow()
         {
@@ -176,6 +176,7 @@ namespace NinjaTrader.Gui.NinjaScript
         private void OnConvertButtonClick(object sender, RoutedEventArgs e)
         {
             if (tbOutput == null) return;
+                logout("Run convertion...");
 
             if (running)
             {
