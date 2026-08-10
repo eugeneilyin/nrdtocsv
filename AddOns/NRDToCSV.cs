@@ -360,7 +360,10 @@ namespace NinjaTrader.Gui.NinjaScript
 
             try
             {
-                MarketReplay.DumpMarketDepth(entry.Instrument, entry.Date.AddDays(1), entry.Date.AddDays(1), entry.CsvFileName);
+                // DumpMarketDepth date-only args select inclusive calendar dates (not [from, to)).
+                // (Date, Date) exports the .nrd YYYYMMDD. (Date, Date+1) includes the next day when
+                // that replay exists. (Date+1, Date+1) selects only the following day / empty if absent.
+                MarketReplay.DumpMarketDepth(entry.Instrument, entry.Date, entry.Date, entry.CsvFileName);
                 logout(string.Format("Conversion \"{0}\" to \"{1}\" complete", entry.FromName, entry.ToName));
             }
             catch (Exception error)
